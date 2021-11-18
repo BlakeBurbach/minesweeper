@@ -26,7 +26,41 @@
   5. If current space has an `*`, we skip it, because we want to preserve that space has an asterisk and not change it to a space or number
 
 */
+const MINE = '*';
 
-export const annotate = (input) => {
+export const annotate = (minefield) => {
+  const annotatedMineField = minefield.map((currentRow, rowIndex) => {
+    let previousRow = minefield[rowIndex - 1], nextRow = minefield[rowIndex + 1], annotatedRow = '';
+    currentRow.split(" ").forEach((currentSpace, spaceIndex) => {
+      let count = 0;
+      const previousSpace = currentRow[spaceIndex - 1];
+      const nextSpace = currentRow[spaceIndex + 1];
+      if(currentSpace !== MINE) {
+        count = countForRow(previousRow, spaceIndex, count);
+        count = countForSpace(previousSpace, count);
+        count = countForSpace(nextSpace, count);
+        count = countForRow(nextRow, spaceIndex, count);
+        annotatedRow.concat(count > 0 ? count : ' ');
+      }
+    });
+    return annotatedRow;
+  });
 
+  return annotatedMineField;
 };
+
+const countForSpace = (space, count) => space === MINE ? incrementCount : count;
+
+const countForRow = (row, spaceIndex, count) => {
+  const previousSpace = row[spaceIndex - 1];
+  const nextSpace = row[spaceIndex + 1];
+
+  if(row.includes(MINE)) {
+    count = countForSpace(previousSpace, count);
+    count = countForSpace(row[spaceIndex], count);
+    count = countForSpace(nextSpace, count);
+  }
+  return count;
+};
+
+const incrementCount = count => count + 1;
