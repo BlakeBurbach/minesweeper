@@ -47,6 +47,8 @@ export const annotate = (minefield) => {
         count = isNotNull(nextRow) ? countForRow(nextRow, spaceIndex, count) : count;
 
         annotatedRow = annotatedRow.concat(count > 0 ? count : ' ');
+      } else {
+        annotatedRow = annotatedRow.concat(MINE);
       }
     }
     return annotatedRow;
