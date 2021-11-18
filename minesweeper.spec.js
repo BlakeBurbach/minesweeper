@@ -5,7 +5,7 @@ describe(')', () => {
     expect(annotate([])).toEqual([]);
   });
 
-  xtest('handles no columns', () => {
+  test('handles no columns', () => {
     expect(annotate([''])).toEqual(['']);
   });
 

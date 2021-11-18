@@ -30,16 +30,21 @@ const MINE = '*';
 
 export const annotate = (minefield) => {
   const annotatedMineField = minefield.map((currentRow, rowIndex) => {
-    let previousRow = minefield[rowIndex - 1], nextRow = minefield[rowIndex + 1], annotatedRow = '';
+    const previousRow = rowIndex - 1 !== -1 ? minefield[rowIndex - 1] : null;
+    const nextRow = rowIndex + 1 !== minefield.length ? minefield[rowIndex + 1] : null;
+    const annotatedRow = '';
+
     currentRow.split(" ").forEach((currentSpace, spaceIndex) => {
       let count = 0;
-      const previousSpace = currentRow[spaceIndex - 1];
-      const nextSpace = currentRow[spaceIndex + 1];
+      const previousSpace = spaceIndex - 1 !== -1 ? currentRow[spaceIndex - 1] : null;
+      const nextSpace = spaceIndex + 1 !== currentRow.length ? currentRow[spaceIndex + 1] : null;
+
       if(currentSpace !== MINE) {
-        count = countForRow(previousRow, spaceIndex, count);
-        count = countForSpace(previousSpace, count);
-        count = countForSpace(nextSpace, count);
-        count = countForRow(nextRow, spaceIndex, count);
+        count = isNotNull(previousRow) ? countForRow(previousRow, spaceIndex, count) : count;
+        count = isNotNull(previousSpace) ? countForSpace(previousSpace, count) : count;
+        count = isNotNull(nextSpace) ? countForSpace(nextSpace, count) : count;
+        count = isNotNull(nextRow) ? countForRow(nextRow, spaceIndex, count) : count;
+
         annotatedRow.concat(count > 0 ? count : ' ');
       }
     });
@@ -49,11 +54,13 @@ export const annotate = (minefield) => {
   return annotatedMineField;
 };
 
-const countForSpace = (space, count) => space === MINE ? incrementCount : count;
+const isNotNull = (item) => item !== null;
+
+const countForSpace = (space, count) => space === MINE ? count + 1 : count;
 
 const countForRow = (row, spaceIndex, count) => {
-  const previousSpace = row[spaceIndex - 1];
-  const nextSpace = row[spaceIndex + 1];
+  const previousSpace = spaceIndex - 1 !== -1 ? row[spaceIndex - 1] : null;
+  const nextSpace = spaceIndex + 1 !== row.length ?  row[spaceIndex + 1] : null;
 
   if(row.includes(MINE)) {
     count = countForSpace(previousSpace, count);
@@ -62,5 +69,3 @@ const countForRow = (row, spaceIndex, count) => {
   }
   return count;
 };
-
-const incrementCount = count => count + 1;
