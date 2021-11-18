@@ -32,10 +32,11 @@ export const annotate = (minefield) => {
   const annotatedMineField = minefield.map((currentRow, rowIndex) => {
     const previousRow = rowIndex - 1 !== -1 ? minefield[rowIndex - 1] : null;
     const nextRow = rowIndex + 1 !== minefield.length ? minefield[rowIndex + 1] : null;
-    const annotatedRow = '';
+    let annotatedRow = '';
 
-    currentRow.split(" ").forEach((currentSpace, spaceIndex) => {
+    for(let spaceIndex = 0; spaceIndex < currentRow.length; spaceIndex++) {
       let count = 0;
+      const currentSpace = currentRow[spaceIndex];
       const previousSpace = spaceIndex - 1 !== -1 ? currentRow[spaceIndex - 1] : null;
       const nextSpace = spaceIndex + 1 !== currentRow.length ? currentRow[spaceIndex + 1] : null;
 
@@ -45,9 +46,9 @@ export const annotate = (minefield) => {
         count = isNotNull(nextSpace) ? countForSpace(nextSpace, count) : count;
         count = isNotNull(nextRow) ? countForRow(nextRow, spaceIndex, count) : count;
 
-        annotatedRow.concat(count > 0 ? count : ' ');
+        annotatedRow = annotatedRow.concat(count > 0 ? count : ' ');
       }
-    });
+    }
     return annotatedRow;
   });
 
@@ -58,6 +59,7 @@ const isNotNull = (item) => item !== null;
 
 const countForSpace = (space, count) => space === MINE ? count + 1 : count;
 
+// Only used for previous and next rows so that we can use current index to check directly vertical adjacent spaces
 const countForRow = (row, spaceIndex, count) => {
   const previousSpace = spaceIndex - 1 !== -1 ? row[spaceIndex - 1] : null;
   const nextSpace = spaceIndex + 1 !== row.length ?  row[spaceIndex + 1] : null;
