@@ -26,50 +26,50 @@
   5. If current space has an `*`, we skip it, because we want to preserve that space has an asterisk and not change it to a space or number
 
 */
-const MINE = '*';
 
 export const annotate = (minefield) => {
   const annotatedMineField = minefield.map((currentRow, rowIndex) => {
-    const previousRow = rowIndex - 1 !== -1 ? minefield[rowIndex - 1] : null;
-    const nextRow = rowIndex + 1 !== minefield.length ? minefield[rowIndex + 1] : null;
     let annotatedRow = '';
+    const previousRow = getPreviousValue(rowIndex, minefield);
+    const nextRow = getNextValue(rowIndex, minefield);
 
-    for(let spaceIndex = 0; spaceIndex < currentRow.length; spaceIndex++) {
+    Array.from(currentRow).forEach((currentSpace, index) => {
       let count = 0;
-      const currentSpace = currentRow[spaceIndex];
-      const previousSpace = spaceIndex - 1 !== -1 ? currentRow[spaceIndex - 1] : null;
-      const nextSpace = spaceIndex + 1 !== currentRow.length ? currentRow[spaceIndex + 1] : null;
 
       if(currentSpace !== MINE) {
-        count = isNotNull(previousRow) ? countForRow(previousRow, spaceIndex, count) : count;
-        count = isNotNull(previousSpace) ? countForSpace(previousSpace, count) : count;
-        count = isNotNull(nextSpace) ? countForSpace(nextSpace, count) : count;
-        count = isNotNull(nextRow) ? countForRow(nextRow, spaceIndex, count) : count;
+        const adjacentRows = [previousRow, currentRow, nextRow];
+        adjacentRows.forEach(row => count = getCountForRow(row, index, count));
 
-        annotatedRow = annotatedRow.concat(count > 0 ? count : ' ');
+        annotatedRow = `${annotatedRow}${count || ' '}`;
       } else {
-        annotatedRow = annotatedRow.concat(MINE);
+        annotatedRow = `${annotatedRow}${MINE}`;
       }
-    }
+    });
     return annotatedRow;
   });
 
   return annotatedMineField;
 };
 
+// ======== UTILS ======
+const MINE = '*';
+
+const getPreviousValue = (index, container) => index - 1 > -1 ? container[index - 1] : null;
+const getNextValue = (index, container) => index + 1 < container.length ? container[index + 1] : null;
+
 const isNotNull = (item) => item !== null;
 
-const countForSpace = (space, count) => space === MINE ? count + 1 : count;
+const countForSpace = (space, count) => isNotNull(space) && space === MINE ? count + 1 : count;
 
-// Only used for previous and next rows so that we can use current index to check directly vertical adjacent spaces
-const countForRow = (row, spaceIndex, count) => {
-  const previousSpace = spaceIndex - 1 !== -1 ? row[spaceIndex - 1] : null;
-  const nextSpace = spaceIndex + 1 !== row.length ?  row[spaceIndex + 1] : null;
+const getCountForRow = (row, currentIndex, count) => {
+  if(isNotNull(row) && row.includes(MINE)) {
+    const previousSpace = getPreviousValue(currentIndex, row);
+    const nextSpace = getNextValue(currentIndex ,row);
+    const currentSpace = row[currentIndex];
+    const adjacentSpaces = [previousSpace, currentSpace, nextSpace];
 
-  if(row.includes(MINE)) {
-    count = countForSpace(previousSpace, count);
-    count = countForSpace(row[spaceIndex], count);
-    count = countForSpace(nextSpace, count);
+    adjacentSpaces.forEach(space => count = countForSpace(space, count));
   }
+
   return count;
 };
